@@ -8,5 +8,5 @@ Targets and window position will save.
 
 To disable or enable the overlay, simply disable or enable the addon.
 
-[](https://i.imgur.com/x1P9lR4.mp4)
+https://i.imgur.com/x1P9lR4.mp4
 
