@@ -46,7 +46,7 @@ local function showPromptForEditing(i)
 end 
 
 function OnLoad()
-    api.Log:Info("[Target Board] loaded! Michael hopes you have an amazing day.")
+    api.Log:Info("[Target Board] loaded! Sheoix hopes you have an amazing day.")
     settings = api.File:Read("target_board/settings.txt")
     if settings == nil then
         settings = {}
