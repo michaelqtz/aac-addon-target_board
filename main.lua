@@ -10,7 +10,12 @@ local target_board_addon = {
 local targetBoardWnd = nil
 local editPromptWnd = nil
 local settings = nil
+local isInitialized = false
 
+local targetCommand = "/target "
+
+local loadTimer = 0
+local loadTime = 100
 
 local function saveSettings()
     api.File:Write("target_board/settings.txt", settings)
@@ -26,6 +31,17 @@ local function saveTargetsAndSettings()
         end
     end
     saveSettings()
+end
+
+local function isKoreanClient()
+    -- We're going to use the bag's title as a way to detect the locale
+    local bag = ADDON:GetContent(UIC.BAG)
+    local koreanAll = "전체"
+    if bag.commonInvenTab.defaultSelectBtn:GetText() == koreanAll then 
+        return true
+    else
+        return false
+    end
 end
 
 local function showPromptForEditing(i)
@@ -45,6 +61,20 @@ local function showPromptForEditing(i)
     editPromptWnd.editTextbox:SetHandler("OnKeyDown", editPromptWnd.editTextbox.OnKeyDown)
 end 
 
+function OnUpdate(dt)
+    if isInitialized then return end
+    loadTimer = loadTimer + dt
+    if loadTimer >= loadTime then 
+        isInitialized = true
+        local x = settings.x or 800
+        local y = settings.y or 800
+        targetBoardWnd:RemoveAllAnchors()
+        targetBoardWnd:AddAnchor("TOPLEFT", "UIParent", x, y)
+        targetBoardWnd:Show(true)
+        loadTimer = 0
+    end
+end 
+
 function OnLoad()
     api.Log:Info("[Target Board] loaded! Sheoix hopes you have an amazing day.")
     settings = api.File:Read("target_board/settings.txt")
@@ -60,11 +90,15 @@ function OnLoad()
         api.File:Write("target_board/settings.txt", settings)
     end
 
+    if isKoreanClient() then 
+        targetCommand = "/주시 "
+    end 
+
     
 
     targetBoardWnd = api.Interface:CreateEmptyWindow("TargetBoardFrame", "UIParent")
     targetBoardWnd:SetExtent(220, 350)
-    targetBoardWnd:AddAnchor("TOPLEFT", "UIParent", settings.x, settings.y)
+    targetBoardWnd:AddAnchor("TOPLEFT", "UIParent", 0, 0)
     -- targetBoardWnd:EnableDrag(true)
 
     editPromptWnd = api.Interface:CreateWindow("editPrompt", "Edit Target")
@@ -130,7 +164,7 @@ function OnLoad()
         function textbox:OnClick()
             -- api.Log:Info("[Target Board] Prefilling chat -> /target " .. self:GetText())
             chatTabWindow[1]:GetChatEdit():SetFocus()
-            chatTabWindow[1]:GetChatEdit():SetText("/target " .. self:GetText())
+            chatTabWindow[1]:GetChatEdit():SetText(targetCommand .. self:GetText())
             chatTabWindow[1]:GetChatEdit():Show(true)
         end 
         textbox:SetHandler("OnClick", textbox.OnClick)
@@ -174,9 +208,10 @@ function OnLoad()
     title:SetHandler("OnDragStop", title.OnDragStop)
     title:EnableDrag(true)
     -- targetBoardWnd:Show(true)
-    
+    api.On("UPDATE", OnUpdate)
 end
 function OnUnload()
+    api.On("UPDATE", function() return end)
     saveTargetsAndSettings()
     api.Interface:Free(targetBoardWnd)
     api.Interface:Free(editPromptWnd)
