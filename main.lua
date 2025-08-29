@@ -61,7 +61,7 @@ local function showPromptForEditing(i)
     editPromptWnd.editTextbox:SetHandler("OnKeyDown", editPromptWnd.editTextbox.OnKeyDown)
 end 
 
-function OnUpdate(dt)
+local function OnUpdate(dt)
     if isInitialized then return end
     loadTimer = loadTimer + dt
     if loadTimer >= loadTime then 
@@ -75,7 +75,7 @@ function OnUpdate(dt)
     end
 end 
 
-function OnLoad()
+local function OnLoad()
     api.Log:Info("[Target Board] loaded! Sheoix hopes you have an amazing day.")
     settings = api.File:Read("target_board/settings.txt")
     if settings == nil then
@@ -210,7 +210,7 @@ function OnLoad()
     -- targetBoardWnd:Show(true)
     api.On("UPDATE", OnUpdate)
 end
-function OnUnload()
+local function OnUnload()
     api.On("UPDATE", function() return end)
     saveTargetsAndSettings()
     api.Interface:Free(targetBoardWnd)
